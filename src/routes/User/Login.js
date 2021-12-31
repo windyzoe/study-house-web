@@ -5,6 +5,7 @@ import { useMount } from 'ahooks';
 import { login as loginReq, validateToken } from '@/services/user';
 import bgImg from '@/assets/bg.jpg';
 import styles from './login.less';
+import { setToken } from '@/utils/authority';
 
 const { Header, Content } = Layout;
 const layout = {
@@ -18,7 +19,11 @@ const Login = props => {
 
   useMount(() => {
     // 检查是否在登陆状态,就直接进应用
-    // validateToken();
+    validateToken().then(res => {
+      if (res?.code === 0) {
+        history.push('/');
+      }
+    });
   });
 
   const handleSubmitLogin = () => {
@@ -31,6 +36,7 @@ const Login = props => {
       .then(res => {
         if (res.code === 0) {
           history.push('/');
+          setToken(res?.data);
         }
       })
       .catch(e => console.log('%c e', 'color: red; font-size: 24px;', e))
@@ -43,19 +49,9 @@ const Login = props => {
       <Content className={styles.mainContent}>
         <div className={styles.loginCard}>
           <div className={styles.logHead}>学区房分析一体化平台</div>
-          <Form
-            className={styles.logContent}
-            {...layout}
-            form={form}
-            name="login"
-            initialValues={{
-              username: 'admin',
-              password: 'admin',
-              code: 'code',
-            }}
-          >
+          <Form className={styles.logContent} {...layout} form={form} name="login">
             <Form.Item
-              name="username"
+              name="name"
               rules={[{ required: true, message: '请填写您的用户名' }]}
               className={styles.formItemNoBorderInput}
             >
@@ -68,9 +64,9 @@ const Login = props => {
             >
               <Input.Password placeholder="请输入密码,注意大小写" />
             </Form.Item>
-            <Form.Item name="code" rules={[{ required: true, message: '请填写验证码' }]} className={styles.formItemNoBorderInput}>
+            {/* <Form.Item name="code" rules={[{ required: true, message: '请填写验证码' }]} className={styles.formItemNoBorderInput}>
               <Input placeholder="请输入验证码" addonAfter={<a style={{ float: 'right', fontSize: 12 }}>点击获取验证码</a>} />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item>
               <Button type="primary" onClick={handleSubmitLogin} className={styles.submit} loading={submitting}>
                 登陆

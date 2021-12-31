@@ -4,6 +4,7 @@ import { message, notification } from 'antd';
 import { routerRedux } from 'dva';
 import _ from 'lodash';
 import { getStore } from '@/app';
+import { getToken } from './authority';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -69,13 +70,13 @@ function serviceErrorHandle({ data, response }) {
   const { code, msg, detail } = data;
   if (code && String(code) !== '0') {
     // 无权限，需要重新登陆
-    if (String(code) === '100401') {
+    if (String(code) === '10014' || String(code) === '10015') {
       const error = new Error('无权限,需重新登录');
       error.type = 'noAuth';
       throw error;
     }
-    // errorCode=1xxxx业务逻辑里专门处理
-    if (String(code).indexOf('1') === 0) {
+    // errorCode=2xxxx业务逻辑里专门处理
+    if (String(code).indexOf('2') === 0) {
       return data;
     }
     const error = new Error();
@@ -98,7 +99,6 @@ const umiRequest = extend({
   requestType: 'json', //json form 可选
   responseType: 'json', //text, blob, arrayBuffer, formData 可选
   getResponse: true,
-  headers: { xxxToken: 'xxxxxxxxx' }, //token认证
   errorHandler: httpStatusErrorHandle, //http错误处理
 });
 
@@ -143,6 +143,16 @@ umiRequest.interceptors.request.use((url, options) => {
   };
 });
 
+// 动态token认证,不能直接扩展
+umiRequest.interceptors.request.use((url, options) => {
+  const optionsValues = { ...options };
+  _.set(optionsValues, 'headers.studyhouse', getToken());
+  return {
+    url,
+    options: optionsValues,
+  };
+});
+
 /**
  * Requests a URL, returning a promise.
  *
@@ -156,13 +166,18 @@ export default function request(url, options) {
     .catch(error => {
       if (['noAuth'].includes(error.type)) {
         getStore().dispatch(routerRedux.push('/user/login'));
-      }
-      if (['service', 'http', 'throttle'].includes(error.type)) {
         notification.error({
           message: error.name,
           description: error.message,
         });
+      } else if (['service', 'http', 'throttle'].includes(error.type)) {
+        notification.error({
+          message: error.name,
+          description: error.message,
+        });
+        throw error;
+      } else {
+        throw error;
       }
-      throw error;
     });
 }

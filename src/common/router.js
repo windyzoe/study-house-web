@@ -121,6 +121,12 @@ export const routerConfig = () => {
     '/house': {
       component: dynamicWrapper([], () => import('../routes/House')),
     },
+    '/building': {
+      component: dynamicWrapper([], () => import('../routes/Building')),
+    },
+    '/school': {
+      component: dynamicWrapper([], () => import('../routes/School')),
+    },
     '/example/dashboard': {
       component: dynamicWrapper([], () => import('../routes/Example/Dashboard')),
       // hideInBreadcrumb: true,

@@ -13,10 +13,11 @@ const proxy = {
   _proxy: {
     proxy: {
       // key值如何定义参考： https://www.npmjs.com/package/path-to-regexp
-      // '/api/(.*)': 'http://localhost:9999/',
+      '/api/(.*)': 'http://localhost:8765/',
     },
     pathRewrite: {
       // '^/example/first/': '/example',
+      '^/api/': '/',
     },
     changeHost: true,
   },

@@ -6,6 +6,7 @@ import moment from 'moment';
 import { Form, Divider, Row, Col, Input, Button, Select, Modal, message, DatePicker, Popconfirm, Menu } from 'antd';
 import { PlusOutlined, CloudUploadOutlined, CloudDownloadOutlined } from '@ant-design/icons';
 import BasicContentLayout from '@/layouts/BasicContentLayout';
+import { list } from '@/services/house';
 import TablePro, { ViewAction, DeleteAction, EditAction, MoreAction, Actions } from '@/components/TablePro';
 
 const { RangePicker } = DatePicker;
@@ -17,7 +18,7 @@ const YourComponent = props => {
   // antd4 form 实例,注意弹框也有的form需新建实例
   const [searchForm] = Form.useForm();
   const [modalVisible, setModalVisible] = useState(false);
-  const [pageParams, setPageParams] = useSetState({ pageNo: 1, pageSize: 10, dataSource: [], loading: false });
+  const [pageParams, setPageParams] = useSetState({ pageNumber: 1, pageSize: 10, dataSource: [], loading: false });
 
   useMount(() => init());
 
@@ -101,26 +102,18 @@ const YourComponent = props => {
    */
   const init = (params = {}) => {
     // 从state里拿页面数据
-    const { pageNo, pageSize } = pageParams;
+    const { pageNumber, pageSize } = pageParams;
     setPageParams({ loading: true });
     const searchValues = getSearchFormValues();
     // ---把页面值\搜索值\传入值整合---
-    const payload = { pageNo, pageSize, ...searchValues, ...params };
-    // ----填写异步的列表请求，替换成你的真实请求----
-    const yourServiceMethod = () => {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          resolve({ data: { records: [{ coloum1: '我', coloum2: '最', coloum3: '牛' }], totalRecords: 1 } });
-        }, 2000);
-      });
-    };
-    // 发起请求，处理后端数据，totalRecords总数量、records列表数据
-    yourServiceMethod(payload).then(res => {
+    const payload = { pageNumber, pageSize, ...searchValues, ...params };
+    // 发起请求，处理后端数据
+    list(payload).then(res => {
       setPageParams({
         // ----lodash取值不会空指针----
         ...payload,
-        dataSource: _.get(res, 'data.records'),
-        total: _.get(res, 'data.totalRecords'),
+        dataSource: _.get(res, 'data.list'),
+        total: _.get(res, 'data.count'),
         loading: false,
       });
     });
@@ -128,7 +121,7 @@ const YourComponent = props => {
 
   // 搜索事件
   const search = () => {
-    init({ pageNo: 1 });
+    init({ pageNumber: 1 });
   };
 
   // 高阶函数的写法引入record
@@ -169,7 +162,7 @@ const YourComponent = props => {
     const { current, pageSize } = pagination;
     init({
       pageSize,
-      pageNo: current,
+      pageNumber: current,
     });
   };
 
@@ -182,9 +175,9 @@ const YourComponent = props => {
     );
   };
 
-  const { dataSource, pageNo, pageSize, total, loading } = pageParams;
+  const { dataSource, pageNumber, pageSize, total, loading } = pageParams;
   const pagination = {
-    current: pageNo,
+    current: pageNumber,
     pageSize,
     total,
   };

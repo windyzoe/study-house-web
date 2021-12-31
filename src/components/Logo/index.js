@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './index.less';
+import IconPro from '../IconPro';
 
 /**
  * @description 当前网站的logo
@@ -8,5 +9,10 @@ import styles from './index.less';
  * @returns
  */
 export default function Logo({ hiddenTitle }) {
-  return <div className={styles.root}>{!hiddenTitle && <div style={{ letterSpacing: '0.15rem' }}>STUDY HOUSE</div>}</div>;
+  return (
+    <div className={styles.root}>
+      <IconPro type="icon-xuexiao" />
+      {!hiddenTitle && <div style={{ marginLeft: 12 }}>STUDY HOUSE</div>}
+    </div>
+  );
 }

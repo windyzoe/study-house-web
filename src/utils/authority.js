@@ -18,3 +18,11 @@ export function getCurrentUser() {
 export function setCurrentUser(v) {
   currentUser = v;
 }
+
+export function getToken() {
+  return sessionStorage.getItem('studyhouse');
+}
+
+export function setToken(v) {
+  sessionStorage.setItem('studyhouse', v);
+}
